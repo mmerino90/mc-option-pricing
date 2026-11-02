@@ -8,7 +8,7 @@ A computational finance learning project: pricing options by Monte Carlo in Pyth
 |---|---|---|
 | 1 | Black–Scholes, geometric Brownian motion, 1/√N convergence | ✅ |
 | 2 | Variance reduction (antithetic variates, control variate, Sobol) | ✅ |
-| 3 | Greeks: pathwise vs finite differences | ⏳ |
+| 3 | Greeks: pathwise vs finite differences | ✅ |
 | 4 | Exotics: Asian, barrier, American (Longstaff–Schwartz) | ⏳ |
 | 5 | C++ core + pybind11, speedup | ⏳ |
 
@@ -31,6 +31,16 @@ For an at-the-money call with the same number of simulations:
 
 Both antithetics and the control variate work far better for in-the-money calls. Table with timings and efficiency in [results/phase2_table.md](results/phase2_table.md).
 
+### Phase 3: Greeks
+
+![greeks](results/phase3_greeks.png)
+
+Delta and vega by the pathwise method match the Black–Scholes formulas across all strikes (left, centre). The right panel shows why finite differences need **common random numbers**:
+- with independent numbers, the error grows like 1/h and is unusable for small bumps;
+- with common numbers, the error is flat and equals the pathwise error until the O(h²) bias takes over around h ≈ 8.
+
+Pathwise gets both Greeks from the pricing simulation itself, with no bump size to tune. Every estimator against the analytical values in [results/phase3_table.md](results/phase3_table.md).
+
 ## Usage
 
 ```bash
@@ -38,4 +48,5 @@ pip install -r requirements.txt
 python -m pytest
 python -m experiments.phase1_convergence
 python -m experiments.phase2_variance_reduction
+python -m experiments.phase3_greeks
 ```

@@ -9,7 +9,7 @@ A computational finance learning project: pricing options by Monte Carlo in Pyth
 | 1 | Black–Scholes, geometric Brownian motion, 1/√N convergence | ✅ |
 | 2 | Variance reduction (antithetic variates, control variate, Sobol) | ✅ |
 | 3 | Greeks: pathwise vs finite differences | ✅ |
-| 4 | Exotics: Asian, barrier, American (Longstaff–Schwartz) | ⏳ |
+| 4 | Exotics: Asian, barrier, American (Longstaff–Schwartz) | ✅ |
 | 5 | C++ core + pybind11, speedup | ⏳ |
 
 ## Results
@@ -41,6 +41,16 @@ Delta and vega by the pathwise method match the Black–Scholes formulas across 
 
 Pathwise gets both Greeks from the pricing simulation itself, with no bump size to tune. Every estimator against the analytical values in [results/phase3_table.md](results/phase3_table.md).
 
+### Phase 4: exotic options
+
+![exotics](results/phase4_exotics.png)
+
+- **Asian call (arithmetic average, 12 fixings).** It has no closed form. The geometric-average Asian does, and its payoff is 0.9996-correlated with the arithmetic one (left), so it works as a control variate. That cuts the variance **600–1,800×**.
+- **Down-and-out barrier call.** Checking the barrier only on discrete dates misses crossings in between, so the price comes out too high (centre): a bias that more paths cannot remove. The Broadie–Glasserman–Kou shifted barrier predicts that bias. A Brownian-bridge correction removes it, already with 4 monitoring dates.
+- **American put via Longstaff–Schwartz.** Least-squares regression estimates the continuation value. It is fitted on one set of paths and priced on an independent one, like a train/test split. On the original paper's example it matches a 50-date Bermudan binomial tree within one standard error (e.g. 4.4775 ± 0.0092 vs 4.4779). A linear basis underfits and misprices by 0.06. The right panel shows the learned exercise boundary against the tree's.
+
+Tables in [results/phase4_table.md](results/phase4_table.md).
+
 ## Usage
 
 ```bash
@@ -49,4 +59,5 @@ python -m pytest
 python -m experiments.phase1_convergence
 python -m experiments.phase2_variance_reduction
 python -m experiments.phase3_greeks
+python -m experiments.phase4_exotics
 ```

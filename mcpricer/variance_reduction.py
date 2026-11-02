@@ -1,7 +1,7 @@
-"""Técnicas de reducción de varianza para la opción europea.
+"""Variance reduction techniques for the European option.
 
-Todas devuelven (precio, error estándar) igual que mc_price, y n es siempre el
-número total de precios S_T simulados, para que la comparación sea justa.
+All return (price, standard error) like mc_price, and n is always the total
+number of simulated prices S_T, so comparisons are fair.
 """
 import numpy as np
 from scipy.stats import norm, qmc
@@ -10,11 +10,11 @@ from .monte_carlo import payoff, terminal_price
 
 
 def mc_antithetic(S0, K, T, r, sigma, n, kind="call", seed=None):
-    """Variables antitéticas: cada normal Z se usa también como -Z.
+    """Antithetic variates: every normal Z is also used as -Z.
 
-    Se generan n/2 normales y se simulan n precios. Las dos mitades de un par
-    NO son independientes, así que el error estándar se calcula sobre la media
-    de cada par, (Y(Z) + Y(-Z)) / 2, que sí son independientes entre pares.
+    Draws n/2 normals and simulates n prices. The two halves of a pair are NOT
+    independent, so the standard error is computed on the pair averages
+    (Y(Z) + Y(-Z)) / 2, which are independent across pairs.
     """
     rng = np.random.default_rng(seed)
     Z = rng.standard_normal(n // 2)
@@ -26,14 +26,14 @@ def mc_antithetic(S0, K, T, r, sigma, n, kind="call", seed=None):
 
 
 def mc_control_variate(S0, K, T, r, sigma, n, kind="call", seed=None):
-    """Variable de control: el propio activo descontado, X = e^{-rT} S_T.
+    """Control variate: the discounted asset itself, X = e^{-rT} S_T.
 
-    Sabemos que E[X] = S0 exactamente. Estimamos
-        Y_cv = Y - b (X - S0),   con b = Cov(Y, X) / Var(X)
-    que es la pendiente de la regresión lineal de Y sobre X.
+    We know E[X] = S0 exactly. We estimate
+        Y_cv = Y - b (X - S0),   with b = Cov(Y, X) / Var(X)
+    which is the slope of the linear regression of Y on X.
     """
-    # ponytail: b se estima con la misma muestra -> sesgo de orden 1/n, despreciable aquí;
-    # una muestra piloto separada lo elimina si hiciera falta.
+    # ponytail: b is estimated on the same sample -> O(1/n) bias, negligible here;
+    # a separate pilot sample removes it if it ever matters.
     rng = np.random.default_rng(seed)
     ST = terminal_price(S0, T, r, sigma, rng.standard_normal(n))
     disc = np.exp(-r * T)
@@ -46,23 +46,23 @@ def mc_control_variate(S0, K, T, r, sigma, n, kind="call", seed=None):
 
 
 def mc_sobol(S0, K, T, r, sigma, n, kind="call", seed=None, replicates=16):
-    """Quasi-Monte Carlo con secuencias de Sobol aleatorizadas (scrambled).
+    """Quasi-Monte Carlo with randomized (scrambled) Sobol sequences.
 
-    Los puntos de Sobol no son independientes, así que la fórmula sigma/sqrt(n)
-    no vale. Truco estándar: repetir con `replicates` aleatorizaciones
-    independientes de n/replicates puntos cada una y medir la dispersión de
-    sus medias. n/replicates debe ser potencia de 2 (Sobol se equilibra así).
+    Sobol points are not independent, so sigma/sqrt(n) does not apply.
+    Standard trick: repeat with `replicates` independent scramblings of
+    n/replicates points each and measure the spread of their means.
+    n/replicates must be a power of 2 (that is where Sobol is balanced).
     """
     per = n // replicates
     m = int(np.log2(per))
     if 2**m != per or per * replicates != n:
-        raise ValueError("n / replicates debe ser una potencia de 2 exacta")
+        raise ValueError("n / replicates must be an exact power of 2")
     rng = np.random.default_rng(seed)
     disc = np.exp(-r * T)
     means = []
     for _ in range(replicates):
         u = qmc.Sobol(d=1, scramble=True, seed=rng).random_base2(m)[:, 0]
-        Z = norm.ppf(u)  # uniforme -> normal invirtiendo la función de distribución
+        Z = norm.ppf(u)  # uniform -> normal by inverting the CDF
         means.append((disc * payoff(terminal_price(S0, T, r, sigma, Z), K, kind)).mean())
     se = np.std(means, ddof=1) / np.sqrt(replicates) if replicates > 1 else np.nan
     return np.mean(means), se

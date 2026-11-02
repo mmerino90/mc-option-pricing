@@ -1,7 +1,7 @@
-N = 1,000,000 simulaciones, S0=100, T=1, r=5%, σ=20%
+N = 1,000,000 simulations, S0=100, T=1, r=5%, σ=20%
 
-| Tipo | K | Black–Scholes | Monte Carlo | Error | Error estándar | |error|/SE |
-|---|---|---|---|---|---|---|
+| Type | K | Black–Scholes | Monte Carlo | Error | Std. error | \|error\|/SE |
+|:--|--:|--:|--:|--:|--:|--:|
 | call | 80 | 24.5888 | 24.5905 | +0.0017 | 0.0192 | 0.09 |
 | call | 90 | 16.6994 | 16.6615 | -0.0379 | 0.0173 | 2.19 |
 | call | 100 | 10.4506 | 10.4411 | -0.0095 | 0.0147 | 0.65 |

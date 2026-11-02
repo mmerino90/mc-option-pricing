@@ -16,15 +16,15 @@ def test_unbiased_within_confidence_interval(method, kind):
 
 @pytest.mark.parametrize("method", METHODS)
 def test_reduces_standard_error(method):
-    # mismo número de precios simulados -> error estándar menor que Monte Carlo simple
+    # same number of simulated prices -> smaller standard error than plain Monte Carlo
     _, se_plain = mc_price(**P, n=N, seed=5)
     _, se = method(**P, n=N, seed=5)
     assert se < se_plain
 
 
 def test_control_variate_is_exact_for_the_asset_itself():
-    # Si el "payoff" fuera el propio activo (call con K=0), la variable de control
-    # lo explica entero: varianza cero y precio exacto S0.
+    # If the "payoff" is the asset itself (call with K=0), the control variate
+    # explains all of it: zero variance and exact price S0.
     price, se = mc_control_variate(**{**P, "K": 0.0}, n=1000, seed=1)
     assert price == pytest.approx(P["S0"])
     assert se == pytest.approx(0.0, abs=1e-10)

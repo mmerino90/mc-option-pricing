@@ -7,13 +7,13 @@ P = dict(S0=100.0, K=100.0, T=1.0, r=0.05, sigma=0.2)
 
 
 def test_bs_known_values():
-    # Valores de referencia de libro (Hull) para estos parámetros
+    # Textbook reference values (Hull) for these parameters
     assert bs_price(**P, kind="call") == pytest.approx(10.4506, abs=1e-4)
     assert bs_price(**P, kind="put") == pytest.approx(5.5735, abs=1e-4)
 
 
 def test_put_call_parity():
-    # C - P = S0 - K e^{-rT}, para cualquier strike
+    # C - P = S0 - K e^{-rT}, for any strike
     for K in (80.0, 100.0, 120.0):
         p = {**P, "K": K}
         lhs = bs_price(**p, kind="call") - bs_price(**p, kind="put")
@@ -29,5 +29,5 @@ def test_mc_within_confidence_interval(kind):
 def test_standard_error_scales_as_inverse_sqrt_n():
     _, se_small = mc_price(**P, n=10_000, seed=2)
     _, se_big = mc_price(**P, n=1_000_000, seed=3)
-    # 100 veces más simulaciones -> error 10 veces menor
+    # 100x more simulations -> 10x smaller error
     assert se_small / se_big == pytest.approx(10, rel=0.05)

@@ -1,28 +1,37 @@
-# Motor de valoración de opciones con Monte Carlo
+# Monte Carlo option pricing engine
 
-Proyecto de aprendizaje de finanzas computacionales: valoración de opciones por Monte Carlo en Python (y después en C++ con pybind11), comparando siempre contra fórmulas analíticas.
+A computational finance learning project: pricing options by Monte Carlo in Python (and later in C++ via pybind11), always checked against analytical formulas.
 
-## Fases
+## Phases
 
-| Fase | Contenido | Estado | Notas |
-|---|---|---|---|
-| 1 | Black–Scholes, GBM, convergencia 1/√N | ✅ | [docs/01-base.md](docs/01-base.md) |
-| 2 | Reducción de varianza (antitéticas, variable de control, Sobol) | ✅ | [docs/02-reduccion-varianza.md](docs/02-reduccion-varianza.md) |
-| 3 | Griegas: pathwise vs diferencias finitas | ⏳ | |
-| 4 | Exóticas: asiática, barrera, americana (Longstaff–Schwartz) | ⏳ | |
-| 5 | Núcleo en C++ + pybind11, speedup | ⏳ | |
+| Phase | Content | Status |
+|---|---|---|
+| 1 | Black–Scholes, geometric Brownian motion, 1/√N convergence | ✅ |
+| 2 | Variance reduction (antithetic variates, control variate, Sobol) | ✅ |
+| 3 | Greeks: pathwise vs finite differences | ⏳ |
+| 4 | Exotics: Asian, barrier, American (Longstaff–Schwartz) | ⏳ |
+| 5 | C++ core + pybind11, speedup | ⏳ |
 
-## Resultados
+## Results
 
-![convergencia](results/phase1_convergence.png)
+### Phase 1: convergence
 
-Pendiente log-log del error: **−0.511** (teoría −0.5). Cobertura del IC 95%: **94.4%**. Tabla completa en [results/phase1_table.md](results/phase1_table.md).
+![convergence](results/phase1_convergence.png)
 
-![reducción de varianza](results/phase2_variance_reduction.png)
+The log-log slope of the error is **−0.511** (theory: −0.5), and the 95% confidence interval contains the Black–Scholes price **94.4%** of the time. Full error table in [results/phase1_table.md](results/phase1_table.md).
 
-Call at-the-money, mismo número de simulaciones: antitéticas reducen la varianza **2×**, la variable de control **7×**, y Sobol converge como **1/N** (pendiente −1.01) en lugar de 1/√N. Tabla en [results/phase2_table.md](results/phase2_table.md).
+### Phase 2: variance reduction
 
-## Uso
+![variance reduction](results/phase2_variance_reduction.png)
+
+For an at-the-money call with the same number of simulations:
+- antithetic variates cut the variance **2×**;
+- the control variate cuts it **7×**;
+- Sobol (quasi-Monte Carlo) converges like **1/N** (slope −1.01) instead of 1/√N.
+
+Both antithetics and the control variate work far better for in-the-money calls. Table with timings and efficiency in [results/phase2_table.md](results/phase2_table.md).
+
+## Usage
 
 ```bash
 pip install -r requirements.txt

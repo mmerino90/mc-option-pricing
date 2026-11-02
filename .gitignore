@@ -2,3 +2,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 notes/
+build/
+*.pyd
+*.so
+*.egg-info/

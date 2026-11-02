@@ -2,3 +2,5 @@ numpy
 scipy
 matplotlib
 pytest
+pybind11
+setuptools

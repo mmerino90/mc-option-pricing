@@ -10,6 +10,8 @@ A computational finance project: pricing options by Monte Carlo in Python, with 
 - **American options:** Longstaff–Schwartz regression prices the classic American put at **4.4775 ± 0.0092**, against 4.4779 from a binomial tree.
 - **C++:** **39–86×** faster than pure Python and up to **7×** faster than vectorised NumPy, with 45 unit tests across Python and C++.
 
+📖 **[What I learned building this](LEARNINGS.md)**: the ideas behind the numbers.
+
 ## Phases
 
 | Phase | Content | Status |
